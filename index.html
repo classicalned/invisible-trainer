@@ -261,15 +261,15 @@
     </div>
   </div>
 
-  <div class="prompt-label" id="stepLabel">Value of the mate?</div>
+  <div class="prompt-label" id="stepLabel">Top or bottom?</div>
 
-  <div class="options ranks" id="rankOptions"></div>
-  <div class="options suits hidden" id="suitOptions"></div>
-
-  <div class="tb-row hidden" id="tbRow">
+  <div class="tb-row" id="tbRow">
     <div class="tb" data-val="Top" id="tbTop">Top</div>
     <div class="tb" data-val="Bottom" id="tbBottom">Bottom</div>
   </div>
+
+  <div class="options ranks hidden" id="rankOptions"></div>
+  <div class="options suits hidden" id="suitOptions"></div>
 
   <div class="footer">
     <button class="next-btn" id="nextBtn">Next card</button>
@@ -343,12 +343,15 @@
 
     renderCardFace(cardDisplay, cardRankEl, cardSuitEl, current.rank, current.suit);
 
-    stepLabel.textContent = 'Value of the mate?';
+    stepLabel.textContent = 'Top or bottom?';
+    rankOptionsEl.classList.add('hidden');
     suitOptionsEl.classList.add('hidden');
-    tbRow.classList.add('hidden');
     nextBtn.classList.remove('show');
 
-    // phase 1: rank
+    tbTop.className = 'tb';
+    tbBottom.className = 'tb';
+
+    // phase 2: rank (built now, revealed after phase 1)
     rankOptionsEl.innerHTML = '';
     RANKS.forEach(rank => {
       const btn = document.createElement('div');
@@ -357,9 +360,8 @@
       btn.addEventListener('click', () => handleRankChoice(btn, rank));
       rankOptionsEl.appendChild(btn);
     });
-    rankOptionsEl.classList.remove('hidden');
 
-    // phase 2: suit (built now, revealed after phase 1)
+    // phase 3: suit (built now, revealed after phase 2)
     suitOptionsEl.innerHTML = '';
     SUITS.forEach(suit => {
       const btn = document.createElement('div');
@@ -368,9 +370,26 @@
       btn.addEventListener('click', () => handleSuitChoice(btn, suit));
       suitOptionsEl.appendChild(btn);
     });
+  }
 
-    tbTop.className = 'tb';
-    tbBottom.className = 'tb';
+  function handleTB(el, val){
+    if(tbAnswered) return;
+    tbAnswered = true;
+
+    tbTop.classList.add('disabled');
+    tbBottom.classList.add('disabled');
+
+    if(val === correctOrientation){
+      el.classList.add('correct');
+    } else {
+      el.classList.add('wrong');
+      (correctOrientation === 'Top' ? tbTop : tbBottom).classList.add('correct');
+    }
+
+    setTimeout(() => {
+      stepLabel.textContent = 'Value of the mate?';
+      rankOptionsEl.classList.remove('hidden');
+    }, 450);
   }
 
   function handleRankChoice(btn, rank){
@@ -409,26 +428,6 @@
       allOpts.forEach(o => {
         if(o.textContent === SUIT_SYMBOL[correct.suit]) o.classList.add('correct');
       });
-    }
-
-    setTimeout(() => {
-      stepLabel.textContent = 'Top or bottom?';
-      tbRow.classList.remove('hidden');
-    }, 450);
-  }
-
-  function handleTB(el, val){
-    if(tbAnswered) return;
-    tbAnswered = true;
-
-    tbTop.classList.add('disabled');
-    tbBottom.classList.add('disabled');
-
-    if(val === correctOrientation){
-      el.classList.add('correct');
-    } else {
-      el.classList.add('wrong');
-      (correctOrientation === 'Top' ? tbTop : tbBottom).classList.add('correct');
     }
 
     nextBtn.classList.add('show');
